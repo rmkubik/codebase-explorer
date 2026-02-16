@@ -1,0 +1,24 @@
+{
+  "name": "parcel-react-starter",
+  "browserslist": "> 0.5%, last 2 versions, not dead",
+  "version": "4.0.0",
+  "description": "",
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "parcel": "^2.12.0",
+    "process": "^0.11.10"
+  },
+  "scripts": {
+    "start": "parcel src/index.html",
+    "prebuild": "npm run clear-cache",
+    "build": "parcel build src/index.html",
+    "clear-cache": "rm -rf dist .parcel-cache"
+  },
+  "author": "Ryan Kubik",
+  "license": "UNLICENSED"
+}
