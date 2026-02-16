@@ -4,21 +4,35 @@
   "version": "4.0.0",
   "description": "",
   "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "klaw": "^4.1.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "ts_dependency_graph": "^2.1.1",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/klaw": "^3.0.7",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
+    "concurrently": "^9.2.1",
     "parcel": "^2.12.0",
-    "process": "^0.11.10"
+    "process": "^0.11.10",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0"
   },
   "scripts": {
-    "start": "parcel src/index.html",
+    "start": "concurrently npm:start:*",
+    "start:frontend": "parcel src/frontend/index.html",
+    "start:backend": "ts-node-dev src/backend/index.ts",
     "prebuild": "npm run clear-cache",
-    "build": "parcel build src/index.html",
+    "build": "parcel build src/frontend/index.html",
     "clear-cache": "rm -rf dist .parcel-cache"
   },
   "author": "Ryan Kubik",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "main": "index.js"
 }
