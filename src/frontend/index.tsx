@@ -4,29 +4,64 @@ import { ExplorerFile, files } from "./api/files";
 
 const App = () => {
   const [fileList, setFileList] = useState<ExplorerFile[]>([]);
+  const [depsMap, setDepsMap] = useState<Record<string, ExplorerFile[]>>({});
+
+  console.log(depsMap);
 
   return (
     <>
       <button
         onClick={async () => {
-          const result = await files.list(
-            "/Users/ryankubik/git/codebase-explorer/src",
+          const fileList = await files.list(
+            "/Users/ryankubik/git/obsidian-parser/src",
           );
 
-          if (result instanceof Error) {
-            console.error(result);
+          if (fileList instanceof Error) {
+            console.error(fileList);
             return;
           }
 
-          setFileList(result);
+          setFileList(fileList);
         }}
       >
         fetch
       </button>
       <ul>
-        {fileList.map((file) => (
-          <li key={file.path}>{file.path}</li>
-        ))}
+        {fileList
+          .filter((file) => !file.isDirectory())
+          .map((file) => (
+            <li key={file.path}>
+              <span>
+                {file.path} -{" "}
+                <button
+                  onClick={async () => {
+                    const deps = await files.getDependencies(file.path);
+
+                    if (deps instanceof Error) {
+                      console.error(deps);
+                      return;
+                    }
+
+                    console.log(deps);
+
+                    setDepsMap((prevMap) => {
+                      return {
+                        ...prevMap,
+                        [file.path]: deps,
+                      };
+                    });
+                  }}
+                >
+                  get deps
+                </button>
+              </span>
+              <ul>
+                {depsMap[file.path]?.map((depFile) => (
+                  <li key={file.path + depFile.path}>{depFile.path}</li>
+                ))}
+              </ul>
+            </li>
+          ))}
       </ul>
     </>
   );
