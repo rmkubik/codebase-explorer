@@ -4,6 +4,8 @@
   "version": "4.0.0",
   "description": "",
   "dependencies": {
+    "@uidotdev/usehooks": "^2.4.1",
+    "@xyflow/react": "^12.10.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "klaw": "^4.1.0",

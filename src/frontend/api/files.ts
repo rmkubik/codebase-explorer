@@ -3,12 +3,31 @@ import { API_BASE_URL } from "./config";
 import { fetchJson } from "./fetchJson";
 import { fromDot } from "ts-graphviz";
 
+/**
+ * AI generated, seems like it works well enough for now
+ */
+function relativePath(from: string, to: string) {
+  const fromParts = from.split("/").filter(Boolean);
+  const toParts = to.split("/").filter(Boolean);
+
+  while (fromParts.length && toParts.length && fromParts[0] === toParts[0]) {
+    fromParts.shift();
+    toParts.shift();
+  }
+
+  return "../".repeat(fromParts.length) + toParts.join("/");
+}
+
 export class ExplorerFile {
   constructor(public path: string) {}
 
   isDirectory() {
     // Good enough proxy for now, I think
     return !this.path.includes(".");
+  }
+
+  getPathRelativeTo(basePath: string) {
+    return relativePath(basePath, this.path);
   }
 }
 

@@ -1,69 +1,88 @@
 import { createRoot } from "react-dom/client";
 import React, { useState } from "react";
 import { ExplorerFile, files } from "./api/files";
+import { Graph } from "./Graph";
+import { FileExplorer } from "./FileExplorer";
+import { Node } from "@xyflow/react";
+import { ExplorerNode, ExplorerNodeData } from "./node";
+import { BASE_PATH } from "./config";
+
+// const { clientX, clientY } =
+//           'changedTouches' in event ? event.changedTouches[0] : event;
+//         const newNode = {
+//           id,
+//           position: screenToFlowPosition({
+//             x: clientX,
+//             y: clientY,
+//           }),
+//           data: { label: `Node ${id}` },
+//           origin: [0.5, 0.0],
+//         };
+
+//         setNodes((nds) => nds.concat(newNode));
+
+// const initialNodes = [
+//   { id: "n1", position: { x: 0, y: 0 }, data: { label: "Node 1" } },
+//   { id: "n2", position: { x: 0, y: 100 }, data: { label: "Node 2" } },
+// ];
 
 const App = () => {
   const [fileList, setFileList] = useState<ExplorerFile[]>([]);
   const [depsMap, setDepsMap] = useState<Record<string, ExplorerFile[]>>({});
+  const [nodes, setNodes] = useState<ExplorerNode[]>([]);
 
-  console.log(depsMap);
+  const getDepsForNode = async (file: ExplorerFile) => {
+    const deps = await files.getDependencies(file.path);
+
+    if (deps instanceof Error) {
+      console.error(deps);
+      return;
+    }
+
+    setDepsMap((prevMap) => {
+      return {
+        ...prevMap,
+        [file.path]: deps,
+      };
+    });
+  };
+
+  function addNode({ file }: { file: ExplorerFile }) {
+    const nodeId = crypto.randomUUID();
+    const node: ExplorerNode = {
+      id: nodeId,
+      type: "customNode",
+      position: { x: 0, y: 0 },
+      data: {
+        label: file.getPathRelativeTo(BASE_PATH),
+        // Not sure if I need to manually id into
+        // data so that CustomNode can access it or not
+        id: nodeId,
+        onExpandDeps: (data: ExplorerNodeData) => {
+          getDepsForNode(data.file);
+        },
+        file,
+      },
+      origin: [0.5, 0],
+    };
+    setNodes((prevNodes) => prevNodes.concat(node));
+  }
 
   return (
-    <>
-      <button
-        onClick={async () => {
-          const fileList = await files.list(
-            "/Users/ryankubik/git/obsidian-parser/src",
-          );
-
-          if (fileList instanceof Error) {
-            console.error(fileList);
-            return;
-          }
-
-          setFileList(fileList);
-        }}
-      >
-        fetch
-      </button>
-      <ul>
-        {fileList
-          .filter((file) => !file.isDirectory())
-          .map((file) => (
-            <li key={file.path}>
-              <span>
-                {file.path} -{" "}
-                <button
-                  onClick={async () => {
-                    const deps = await files.getDependencies(file.path);
-
-                    if (deps instanceof Error) {
-                      console.error(deps);
-                      return;
-                    }
-
-                    console.log(deps);
-
-                    setDepsMap((prevMap) => {
-                      return {
-                        ...prevMap,
-                        [file.path]: deps,
-                      };
-                    });
-                  }}
-                >
-                  get deps
-                </button>
-              </span>
-              <ul>
-                {depsMap[file.path]?.map((depFile) => (
-                  <li key={file.path + depFile.path}>{depFile.path}</li>
-                ))}
-              </ul>
-            </li>
-          ))}
-      </ul>
-    </>
+    <div style={{ display: "flex", flexDirection: "row" }}>
+      <div style={{ width: "20vw" }}>
+        <FileExplorer
+          fileList={fileList}
+          setFileList={setFileList}
+          depsMap={depsMap}
+          setDepsMap={setDepsMap}
+          addNode={addNode}
+        />
+      </div>
+      <div style={{ flex: 1, height: "100vh" }}>
+        <Graph nodes={nodes} setNodes={setNodes} />
+      </div>
+    </div>
   );
 };
 
