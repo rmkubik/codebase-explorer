@@ -25,7 +25,8 @@
     "parcel": "^2.12.0",
     "process": "^0.11.10",
     "ts-node": "^10.9.2",
-    "ts-node-dev": "^2.0.0"
+    "ts-node-dev": "^2.0.0",
+    "vitest": "^4.0.18"
   },
   "scripts": {
     "start": "concurrently npm:start:*",
@@ -33,7 +34,8 @@
     "start:backend": "ts-node-dev src/backend/index.ts",
     "prebuild": "npm run clear-cache",
     "build": "parcel build src/frontend/index.html",
-    "clear-cache": "rm -rf dist .parcel-cache"
+    "clear-cache": "rm -rf dist .parcel-cache",
+    "test": "vitest src"
   },
   "author": "Ryan Kubik",
   "license": "UNLICENSED",

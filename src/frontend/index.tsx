@@ -3,33 +3,17 @@ import React, { useState } from "react";
 import { ExplorerFile, files } from "./api/files";
 import { Graph } from "./Graph";
 import { FileExplorer } from "./FileExplorer";
-import { Node } from "@xyflow/react";
+import { Edge, Node, useEdgesState } from "@xyflow/react";
 import { ExplorerNode, ExplorerNodeData } from "./node";
 import { BASE_PATH } from "./config";
-
-// const { clientX, clientY } =
-//           'changedTouches' in event ? event.changedTouches[0] : event;
-//         const newNode = {
-//           id,
-//           position: screenToFlowPosition({
-//             x: clientX,
-//             y: clientY,
-//           }),
-//           data: { label: `Node ${id}` },
-//           origin: [0.5, 0.0],
-//         };
-
-//         setNodes((nds) => nds.concat(newNode));
-
-// const initialNodes = [
-//   { id: "n1", position: { x: 0, y: 0 }, data: { label: "Node 1" } },
-//   { id: "n2", position: { x: 0, y: 100 }, data: { label: "Node 2" } },
-// ];
+import { ExplorerEdge } from "./edge";
+import { remove } from "./array";
 
 const App = () => {
   const [fileList, setFileList] = useState<ExplorerFile[]>([]);
   const [depsMap, setDepsMap] = useState<Record<string, ExplorerFile[]>>({});
   const [nodes, setNodes] = useState<ExplorerNode[]>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<ExplorerEdge>([]);
 
   const getDepsForNode = async (file: ExplorerFile) => {
     const deps = await files.getDependencies(file.path);
@@ -64,8 +48,17 @@ const App = () => {
         id: nodeId,
         onExpandDeps: async (data: ExplorerNodeData) => {
           const deps = await getDepsForNode(data.file);
-          deps?.forEach((file) => {
-            addNode({ file });
+          deps?.forEach((depFile) => {
+            const depNode = addNode({ file: depFile });
+            addEdge({ from: node, to: depNode });
+          });
+        },
+        onDeleteNode: ({ file }: { file: ExplorerFile }) => {
+          setNodes((prevNodes) => {
+            const fileIndex = prevNodes.findIndex(
+              (node) => node.data.file.path === file.path,
+            );
+            return remove(prevNodes, fileIndex);
           });
         },
         file,
@@ -73,6 +66,18 @@ const App = () => {
       origin: [0.5, 0],
     };
     setNodes((prevNodes) => prevNodes.concat(node));
+    return node;
+  }
+
+  function addEdge({ from, to }: { from: ExplorerNode; to: ExplorerNode }) {
+    const edgeId = crypto.randomUUID();
+    const edge: ExplorerEdge = {
+      id: edgeId,
+      source: from.id,
+      target: to.id,
+    };
+    setEdges((prevEdges) => prevEdges.concat(edge));
+    return edge;
   }
 
   return (
@@ -87,7 +92,12 @@ const App = () => {
         />
       </div>
       <div style={{ flex: 1, height: "100vh" }}>
-        <Graph nodes={nodes} setNodes={setNodes} />
+        <Graph
+          nodes={nodes}
+          setNodes={setNodes}
+          edges={edges}
+          setEdges={setEdges}
+        />
       </div>
     </div>
   );

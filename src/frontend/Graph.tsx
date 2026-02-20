@@ -7,12 +7,13 @@ import {
   NodeChange,
   EdgeChange,
   Node,
+  Edge,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { CustomNode } from "./CustomNode";
 import { ExplorerNode } from "./node";
+import { ExplorerEdge } from "./edge";
 
-const initialEdges = [{ id: "n1-n2", source: "n1", target: "n2" }];
 const nodeTypes = {
   customNode: CustomNode,
 };
@@ -20,12 +21,14 @@ const nodeTypes = {
 export function Graph({
   nodes,
   setNodes,
+  edges,
+  setEdges,
 }: {
   nodes: ExplorerNode[];
   setNodes: Dispatch<SetStateAction<ExplorerNode[]>>;
+  edges: ExplorerEdge[];
+  setEdges: Dispatch<SetStateAction<ExplorerEdge[]>>;
 }) {
-  const [edges, setEdges] = useState(initialEdges);
-
   const onNodesChange = useCallback(
     (changes: NodeChange<ExplorerNode>[]) =>
       setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot)),

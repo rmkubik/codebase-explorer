@@ -30,15 +30,27 @@ export const CustomNode = memo(({ data, isConnectable }) => {
         position={Position.Bottom}
         isConnectable={isConnectable}
       />
-      {hovering && <ActionBar onExpandDeps={() => data.onExpandDeps(data)} />}
+      {hovering && (
+        <ActionBar
+          onExpandDeps={() => data.onExpandDeps(data)}
+          onDeleteNode={() => data.onDeleteNode({ file: data.file })}
+        />
+      )}
     </div>
   );
 });
 
-function ActionBar({ onExpandDeps }: { onExpandDeps: () => void }) {
+function ActionBar({
+  onExpandDeps,
+  onDeleteNode,
+}: {
+  onExpandDeps: () => void;
+  onDeleteNode: () => void;
+}) {
   return (
     <div style={{ position: "absolute" }}>
       <button onClick={onExpandDeps}>👁️</button>
+      <button onClick={onDeleteNode}>🗑️</button>
     </div>
   );
 }
