@@ -45,6 +45,8 @@ const App = () => {
         [file.path]: deps,
       };
     });
+
+    return deps;
   };
 
   function addNode({ file }: { file: ExplorerFile }) {
@@ -54,12 +56,17 @@ const App = () => {
       type: "customNode",
       position: { x: 0, y: 0 },
       data: {
-        label: file.getPathRelativeTo(BASE_PATH),
+        label: file.isAbsolutePath()
+          ? file.getPathRelativeTo(BASE_PATH)
+          : file.path,
         // Not sure if I need to manually id into
         // data so that CustomNode can access it or not
         id: nodeId,
-        onExpandDeps: (data: ExplorerNodeData) => {
-          getDepsForNode(data.file);
+        onExpandDeps: async (data: ExplorerNodeData) => {
+          const deps = await getDepsForNode(data.file);
+          deps?.forEach((file) => {
+            addNode({ file });
+          });
         },
         file,
       },

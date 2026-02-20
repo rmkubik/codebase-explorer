@@ -2,6 +2,7 @@ import z from "zod";
 import { API_BASE_URL } from "./config";
 import { fetchJson } from "./fetchJson";
 import { fromDot } from "ts-graphviz";
+import { BASE_PATH } from "../config";
 
 /**
  * AI generated, seems like it works well enough for now
@@ -26,6 +27,10 @@ export class ExplorerFile {
     return !this.path.includes(".");
   }
 
+  isAbsolutePath() {
+    return this.path.startsWith("/");
+  }
+
   getPathRelativeTo(basePath: string) {
     return relativePath(basePath, this.path);
   }
@@ -46,6 +51,7 @@ export const files = {
   },
   async getDependencies(filePath: string): Promise<ExplorerFile[] | Error> {
     const url = new URL(API_BASE_URL + "/files/get-deps");
+    url.searchParams.set("basePath", BASE_PATH);
     url.searchParams.set("filePath", filePath);
 
     const result = await fetchJson(url.toString());

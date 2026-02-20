@@ -32,7 +32,7 @@ app.get("/api/v1/files/list", async (req, res) => {
 });
 
 app.get("/api/v1/files/get-deps", async (req, res) => {
-  const { filePath } = req.query;
+  const { filePath, basePath } = req.query;
 
   if (!filePath) {
     res.status(400).send(`filePath is required query param`);
@@ -44,7 +44,17 @@ app.get("/api/v1/files/get-deps", async (req, res) => {
     return;
   }
 
-  const deps = await parseDependenciesForFile(filePath);
+  if (!basePath) {
+    res.status(400).send(`basePath is required query param`);
+    return;
+  }
+
+  if (typeof basePath !== "string") {
+    res.status(400).send(`basePath must be string`);
+    return;
+  }
+
+  const deps = await parseDependenciesForFile(basePath, filePath);
   console.log(deps);
   res.status(200).send(JSON.stringify({ deps }));
 });
