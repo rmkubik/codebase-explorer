@@ -1,7 +1,7 @@
 import z from "zod";
 import { API_BASE_URL } from "./config";
 import { fetchJson } from "./fetchJson";
-import { fromDot } from "ts-graphviz";
+import { fromDot, RootGraphModel } from "ts-graphviz";
 import { BASE_PATH } from "../config";
 
 /**
@@ -68,7 +68,14 @@ export const files = {
     if (!schemaResult.success)
       return new Error("Failed to parse schema: " + schemaResult.error);
 
-    const deps = fromDot(schemaResult.data.deps);
+    let deps: RootGraphModel;
+    try {
+      deps = fromDot(schemaResult.data.deps);
+    } catch (err) {
+      return new Error(
+        `Failed to parse deps response as DOT: ${schemaResult.data.deps}`,
+      );
+    }
 
     return (
       deps

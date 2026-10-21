@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { ExplorerFile, files } from "./api/files";
 import { Graph } from "./Graph";
 import { FileExplorer } from "./FileExplorer";
@@ -9,11 +9,59 @@ import { BASE_PATH } from "./config";
 import { ExplorerEdge } from "./edge";
 import { remove } from "./array";
 
+import * as d3 from "d3";
+
 const App = () => {
   const [fileList, setFileList] = useState<ExplorerFile[]>([]);
   const [depsMap, setDepsMap] = useState<Record<string, ExplorerFile[]>>({});
   const [nodes, setNodes] = useState<ExplorerNode[]>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<ExplorerEdge>([]);
+
+  /**
+   * This is just ChatGPT. Idk how this works
+   * specifically.
+   *
+   * I need to rework how I'm setting this all
+   * up so that nodes can be gravity applied
+   * on creation and not need an extra click.
+   */
+  const spreadNodes = useCallback(() => {
+    const simNodes = nodes.map((n) => ({
+      id: n.id,
+      x: n.position.x,
+      y: n.position.y,
+      node: n,
+    }));
+
+    const simEdges = edges.map((e) => ({
+      source: e.source,
+      target: e.target,
+    }));
+
+    const simulation = d3
+      .forceSimulation(simNodes)
+      .force(
+        "link",
+        d3
+          .forceLink(simEdges)
+          .id((d) => d.id)
+          .distance(100),
+      )
+      .force("charge", d3.forceManyBody().strength(-30))
+      .force("center", d3.forceCenter(25, 25))
+      .stop();
+
+    // Run simulation manually
+    for (let i = 0; i < 300; i++) simulation.tick();
+
+    // Update node positions
+    setNodes((prevNodes) =>
+      simNodes.map((simNode) => ({
+        ...simNode.node,
+        position: { x: simNode.x, y: simNode.y },
+      })),
+    );
+  }, [nodes]);
 
   const getDepsForNode = async (file: ExplorerFile) => {
     const deps = await files.getDependencies(file.path);
@@ -82,6 +130,7 @@ const App = () => {
 
   return (
     <div style={{ display: "flex", flexDirection: "row" }}>
+      <button onClick={spreadNodes}>spread</button>
       <div style={{ width: "20vw" }}>
         <FileExplorer
           fileList={fileList}

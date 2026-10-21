@@ -7,6 +7,7 @@
     "@uidotdev/usehooks": "^2.4.1",
     "@xyflow/react": "^12.10.0",
     "cors": "^2.8.6",
+    "d3": "^7.9.0",
     "express": "^5.2.1",
     "klaw": "^4.1.0",
     "react": "^18.2.0",
@@ -17,6 +18,7 @@
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
+    "@types/d3": "^7.4.3",
     "@types/express": "^5.0.6",
     "@types/klaw": "^3.0.7",
     "@types/react": "^19.1.2",
